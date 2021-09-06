@@ -1,23 +1,39 @@
 package module
 
 type Im920s struct {
-	UartChannel UartChannel
+	uartChannel      UartChannel
+	dataReceiver     chan ReceivedData
+	responseReceiver chan string
 }
 
 type UartChannel struct {
-	Transmitter chan string
-	Receiver    chan string
+	transmitter chan string
+	receiver    chan string
 }
 
 func NewIm920s() *Im920s {
 	im920s := new(Im920s)
 
-	im920s.UartChannel.Transmitter = make(chan string)
-	im920s.UartChannel.Receiver = make(chan string)
+	im920s.uartChannel.transmitter = make(chan string)
+	im920s.uartChannel.receiver = make(chan string)
 
 	return im920s
 }
 
 func (im920s *Im920s) SendCommand(msg string) {
-	im920s.UartChannel.Transmitter <- msg
+	im920s.uartChannel.transmitter <- msg
+}
+
+// Getter
+
+func (im920s Im920s) UartTransmitter() chan string {
+	return im920s.uartChannel.transmitter
+}
+
+func (im920s Im920s) UartReceiver() chan string {
+	return im920s.uartChannel.receiver
+}
+
+func (im920s Im920s) DataReceiver() chan ReceivedData {
+	return im920s.dataReceiver
 }

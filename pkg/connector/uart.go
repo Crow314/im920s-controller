@@ -62,9 +62,7 @@ func (connector *Connector) receive(receiver chan<- string) {
 				log.Fatal(err)
 			}
 
-			if _, err := fmt.Fprintf(os.Stderr, "Debug: Receive %q\n", string(dataBuf[:n])); err != nil {
-				log.Fatalf("Can't print to stderr\n%v", err)
-			}
+			_, _ = fmt.Fprintf(os.Stderr, "Debug: Receive %q\n", string(dataBuf[:n]))
 
 			for _, v := range dataBuf[:n] {
 				msgBuf = append(msgBuf, v)

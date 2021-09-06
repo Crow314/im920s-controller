@@ -12,7 +12,7 @@ import (
 
 func main() {
 	im920s := module.NewIm920s()
-	connector.InitConnector("COM5", im920s.UartChannel.Transmitter, im920s.UartChannel.Receiver)
+	connector.InitConnector("COM5", im920s.UartTransmitter(), im920s.UartReceiver())
 
 	go func() {
 		for {
