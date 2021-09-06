@@ -15,9 +15,13 @@ func NewIm920s() *Im920s {
 	im920s := new(Im920s)
 
 	im920s.uartChannel.transmitter = make(chan string)
-	im920s.uartChannel.receiver = make(chan string)
+	im920s.uartChannel.receiver = make(chan string, 3) // 損失防止
 
 	return im920s
+}
+
+func (im920s *Im920s) Init() {
+	go im920s.receiver()
 }
 
 func (im920s *Im920s) SendCommand(msg string) {
