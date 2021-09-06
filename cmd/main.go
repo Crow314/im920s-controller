@@ -12,11 +12,11 @@ import (
 
 func main() {
 	im920s := module.NewIm920s()
-	connector.InitConnector("COM5", im920s.TransmitChannel, im920s.ReceiveChannel)
+	connector.InitConnector("COM5", im920s.UartChannel.Transmitter, im920s.UartChannel.Receiver)
 
 	go func() {
 		for {
-			msg := <-im920s.ReceiveChannel
+			msg := <-im920s.UartChannel.Receiver
 			msg = strings.Replace(msg, "\r\n", "", -1)
 			fmt.Println(msg)
 		}
