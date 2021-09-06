@@ -11,9 +11,11 @@ import (
 type Connector struct {
 	portName string
 	port     *serial.Port
+	txChan   chan string
+	rxChan   chan string
 }
 
-func InitConnector(portName string, transmitter <-chan string, receiver chan<- string) *Connector {
+func NewConnector(portName string) *Connector {
 	conn := new(Connector)
 	conn.portName = portName
 
@@ -25,19 +27,22 @@ func InitConnector(portName string, transmitter <-chan string, receiver chan<- s
 	}
 	conn.port = p
 
-	go conn.transmit(transmitter)
-	go conn.receive(receiver)
+	conn.txChan = make(chan string)
+	conn.rxChan = make(chan string, 5) // 損失対策 / RTSを受け取ってくれないので
+
+	go conn.transmit()
+	go conn.receive()
 
 	return conn
 }
 
-func (connector *Connector) transmit(transmitter <-chan string) {
+func (conn *Connector) transmit() {
 	println("Info: Start Transmitter")
 
 	for {
-		msg := <-transmitter
+		msg := <-conn.txChan
 
-		_, err := connector.port.Write([]byte(msg))
+		_, err := conn.port.Write([]byte(msg))
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -45,7 +50,7 @@ func (connector *Connector) transmit(transmitter <-chan string) {
 	}
 }
 
-func (connector *Connector) receive(receiver chan<- string) {
+func (conn *Connector) receive() {
 	println("Info: Start Receiver")
 	dataBuf := make([]byte, 128)
 	msgBuf := make([]byte, 0, 128)
@@ -57,7 +62,7 @@ func (connector *Connector) receive(receiver chan<- string) {
 		// LFまでを取得
 	line:
 		for {
-			n, err := connector.port.Read(dataBuf)
+			n, err := conn.port.Read(dataBuf)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -74,7 +79,17 @@ func (connector *Connector) receive(receiver chan<- string) {
 				}
 			}
 		}
-		receiver <- msg
+		conn.rxChan <- msg
 		println("Debug: Receive Message: " + msg)
 	}
+}
+
+// Getter
+
+func (conn Connector) TransmitChannel() chan<- string {
+	return conn.txChan
+}
+
+func (conn Connector) ReceiveChannel() <-chan string {
+	return conn.rxChan
 }

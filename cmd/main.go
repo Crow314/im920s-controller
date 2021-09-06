@@ -11,10 +11,16 @@ import (
 )
 
 func main() {
-	im920s := module.NewIm920s()
-	connector.InitConnector("COM5", im920s.UartTransmitter(), im920s.UartReceiver())
+	scanner := bufio.NewScanner(os.Stdin)
 
-	im920s.Init()
+	fmt.Print("Please input COM port path/name: ")
+	var portName string
+	if scanner.Scan() {
+		portName = scanner.Text()
+	}
+
+	conn := connector.NewConnector(portName)
+	im920s := module.NewIm920s(conn.TransmitChannel(), conn.ReceiveChannel())
 
 	go func() {
 		for {
@@ -27,7 +33,6 @@ func main() {
 
 	for {
 		var msg string
-		scanner := bufio.NewScanner(os.Stdin)
 		if scanner.Scan() {
 			msg = scanner.Text()
 		}
