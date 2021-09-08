@@ -61,6 +61,8 @@ func parseData(dataStr string) (*ReceivedData, error) {
 	}
 
 	header := strings.Split(tmpStrs[0], ",")
+	// TODO ECIO
+	body := strings.Split(tmpStrs[1], ",") // Only DCIO mode
 
 	if header[0] != "00" {
 		return nil, errors.New("invalid format\nDummy is not 0x00.")
@@ -79,6 +81,16 @@ func parseData(dataStr string) (*ReceivedData, error) {
 		return nil, err
 	}
 	data.rssi = int8(tmpByte)
+
+	// Data
+	data.data = make([]byte, len(body))
+	for i, v := range body {
+		res, err := parseByteHex(v)
+		if err != nil {
+			return nil, err
+		}
+		data.data[i] = res
+	}
 
 	return data, nil
 }

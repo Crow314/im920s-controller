@@ -24,10 +24,21 @@ func main() {
 
 	go func() {
 		for {
+			msg := <-im920s.MessageReceiver()
+			fmt.Println(msg)
+		}
+	}()
+
+	go func() {
+		for {
 			data := <-im920s.DataReceiver()
 			fmt.Printf("node: %d\n", data.Node())
 			fmt.Printf("RSSI: %ddb\n", data.Rssi())
-			fmt.Println(data.Data())
+
+			for _, v := range data.Data() {
+				fmt.Printf("%X, ", v)
+			}
+			fmt.Println()
 		}
 	}()
 
