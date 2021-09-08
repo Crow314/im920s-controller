@@ -24,13 +24,6 @@ func main() {
 
 	go func() {
 		for {
-			msg := <-im920s.MessageReceiver()
-			fmt.Println(msg)
-		}
-	}()
-
-	go func() {
-		for {
 			data := <-im920s.DataReceiver()
 			fmt.Printf("node: %d\n", data.Node())
 			fmt.Printf("RSSI: %ddb\n", data.Rssi())
@@ -52,6 +45,11 @@ func main() {
 			msg += "\r\n"
 		}
 
-		im920s.SendCommand(msg)
+		res, err := im920s.SendCommand(msg)
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "%v\n", err)
+		} else {
+			fmt.Println(res)
+		}
 	}
 }
