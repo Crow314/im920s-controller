@@ -55,32 +55,26 @@ func (conn *Connector) receive() {
 	dataBuf := make([]byte, 128)
 	msgBuf := make([]byte, 0, 128)
 
-	// Arduinoのloop()的なアレ
 	for {
-		var msg string
+		n, err := conn.port.Read(dataBuf)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-		// LFまでを取得
-	line:
-		for {
-			n, err := conn.port.Read(dataBuf)
-			if err != nil {
-				log.Fatal(err)
-			}
+		_, _ = fmt.Fprintf(os.Stderr, "Debug: Receive %q\n", string(dataBuf[:n]))
 
-			_, _ = fmt.Fprintf(os.Stderr, "Debug: Receive %q\n", string(dataBuf[:n]))
+		// 1回での受信データ (!= 1行)
+		for _, v := range dataBuf[:n] {
+			msgBuf = append(msgBuf, v)
 
-			for _, v := range dataBuf[:n] {
-				msgBuf = append(msgBuf, v)
+			if v == '\n' { // LFで一区切り
+				msg := string(msgBuf)
+				msgBuf = msgBuf[:0] // 要素を全て削除
 
-				if v == '\n' {
-					msg = string(msgBuf)
-					msgBuf = msgBuf[:0] // 要素を全て削除
-					break line
-				}
+				conn.rxChan <- msg
+				println("Debug: Receive Message: " + msg)
 			}
 		}
-		conn.rxChan <- msg
-		println("Debug: Receive Message: " + msg)
 	}
 }
 

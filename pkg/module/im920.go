@@ -41,6 +41,18 @@ func (im920s *Im920s) SendCommand(msg string) (string, error) {
 		if res == "NG\r\n" {
 			err = errors.New("returned \"NG\" response")
 		}
+
+		if msg == "RPRM\r\n" || msg == "rprm\r\n" {
+		loop:
+			for { // 2行目以降に対応
+				select {
+				case res2 := <-im920s.responseReceiver:
+					res += res2
+				case <-time.After(1 * time.Second):
+					break loop
+				}
+			}
+		}
 	case <-time.After(10 * time.Second):
 		err = errors.New("returned no response")
 	}
