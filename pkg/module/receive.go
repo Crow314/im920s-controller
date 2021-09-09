@@ -23,7 +23,7 @@ func (im920s *Im920s) receiver() {
 
 		// onReceived的なsomething
 
-		if isReceivedData(str) {
+		if isReceivedData(str) { // データ受信
 			data, err := parseData(str)
 			if err != nil {
 				_, _ = fmt.Fprintf(os.Stderr, "Error: Failed to parse data\n%v\n", err)
@@ -32,7 +32,12 @@ func (im920s *Im920s) receiver() {
 
 			im920s.dataReceiver <- *data
 		} else {
-			im920s.responseReceiver <- str
+			if str == "GRNOREGD\r\n" { // STGNコマンド実行後 グループ番号設定パケット受信時
+				// TODO config struct
+				println("Info: Group number has been registered")
+			} else { // コマンドに対するレスポンス
+				im920s.responseReceiver <- str
+			}
 		}
 	}
 }
