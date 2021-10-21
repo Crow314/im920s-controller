@@ -2,6 +2,7 @@ package module
 
 import (
 	"errors"
+	"strings"
 	"time"
 )
 
@@ -30,6 +31,10 @@ func NewIm920s(transmitter chan<- string, receiver <-chan string) *Im920s {
 }
 
 func (im920s *Im920s) SendCommand(msg string) (string, error) {
+	if !strings.HasSuffix(msg, "\r\n") { // 末尾がCRLFでない場合
+		msg += "\r\n"
+	}
+
 	im920s.responseReceiver = make(chan string)
 	im920s.uartChannel.transmitter <- msg
 

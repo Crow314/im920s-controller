@@ -1,13 +1,11 @@
 package main
 
 import (
+	"IM920s-controller-pi/pkg/connector"
+	"IM920s-controller-pi/pkg/module"
 	"bufio"
 	"fmt"
 	"os"
-	"strings"
-
-	"IM920s-controller-pi/pkg/connector"
-	"IM920s-controller-pi/pkg/module"
 )
 
 func main() {
@@ -39,10 +37,6 @@ func main() {
 		var msg string
 		if scanner.Scan() {
 			msg = scanner.Text()
-		}
-
-		if !strings.HasSuffix(msg, "\r\n") { // 末尾がCRLFでない場合
-			msg += "\r\n"
 		}
 
 		res, err := im920s.SendCommand(msg)
