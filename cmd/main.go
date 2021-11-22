@@ -1,10 +1,10 @@
 package main
 
 import (
-	"IM920s-controller-pi/pkg/connector"
-	"IM920s-controller-pi/pkg/module"
 	"bufio"
 	"fmt"
+	"im920s-controller-pi/pkg/connector"
+	"im920s-controller-pi/pkg/module"
 	"os"
 )
 

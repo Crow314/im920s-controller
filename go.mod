@@ -1,4 +1,4 @@
-module IM920s-controller-pi
+module im920s-controller-pi
 
 go 1.17
 
