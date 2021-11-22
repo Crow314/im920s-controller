@@ -1,4 +1,4 @@
-module im920s-controller
+module github.com/Crow314/im920s-controller
 
 go 1.17
 
