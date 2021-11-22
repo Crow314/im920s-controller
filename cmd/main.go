@@ -3,8 +3,8 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"im920s-controller-pi/pkg/connector"
-	"im920s-controller-pi/pkg/module"
+	"im920s-controller/pkg/connector"
+	"im920s-controller/pkg/module"
 	"os"
 )
 
