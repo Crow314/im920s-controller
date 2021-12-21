@@ -1,11 +1,8 @@
 package connector
 
 import (
-	"fmt"
-	"log"
-	"os"
-
 	"github.com/tarm/serial"
+	"log"
 )
 
 type Connector struct {
@@ -37,8 +34,6 @@ func NewConnector(portName string) *Connector {
 }
 
 func (conn *Connector) transmit() {
-	println("Info: Start Transmitter")
-
 	for {
 		msg := <-conn.txChan
 
@@ -46,12 +41,10 @@ func (conn *Connector) transmit() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		println("Debug: Transmit: " + msg)
 	}
 }
 
 func (conn *Connector) receive() {
-	println("Info: Start Receiver")
 	dataBuf := make([]byte, 128)
 	msgBuf := make([]byte, 0, 128)
 
@@ -60,8 +53,6 @@ func (conn *Connector) receive() {
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		_, _ = fmt.Fprintf(os.Stderr, "Debug: Receive %q\n", string(dataBuf[:n]))
 
 		// 1回での受信データ (!= 1行)
 		for _, v := range dataBuf[:n] {
@@ -72,7 +63,6 @@ func (conn *Connector) receive() {
 				msgBuf = msgBuf[:0] // 要素を全て削除
 
 				conn.rxChan <- msg
-				println("Debug: Receive Message: " + msg)
 			}
 		}
 	}
