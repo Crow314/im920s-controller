@@ -9,7 +9,6 @@ import (
 type Im920s struct {
 	uartChannel        uartChannel
 	dataReceiver       chan ReceivedData
-	responseReceiver   chan string
 	commandSendChannel chan *command
 }
 
@@ -34,8 +33,10 @@ func NewIm920s(transmitter chan<- string, receiver <-chan string) *Im920s {
 	im920s.dataReceiver = make(chan ReceivedData)
 	im920s.commandSendChannel = make(chan *command)
 
-	go im920s.receiver()
-	go im920s.commandSender()
+	cmdResChan := make(chan string)
+
+	go im920s.receiver(cmdResChan)
+	go im920s.commandSender(cmdResChan)
 
 	return im920s
 }
@@ -60,7 +61,7 @@ func (im920s *Im920s) SendCommand(msg string) (string, error) {
 	return cmd.response, cmd.errorResponse
 }
 
-func (im920s *Im920s) commandSender() {
+func (im920s *Im920s) commandSender(cmdResponseChan chan string) {
 	for {
 		cmd := <-im920s.commandSendChannel
 		msg := cmd.message
@@ -70,7 +71,7 @@ func (im920s *Im920s) commandSender() {
 		var err error
 
 		select {
-		case res = <-im920s.responseReceiver:
+		case res = <-cmdResponseChan:
 			if res == "NG\r\n" {
 				err = errors.New("returned \"NG\" response")
 			}
@@ -79,7 +80,7 @@ func (im920s *Im920s) commandSender() {
 			loop:
 				for { // 2行目以降に対応
 					select {
-					case res2 := <-im920s.responseReceiver:
+					case res2 := <-cmdResponseChan:
 						res += res2
 					case <-time.After(1 * time.Second):
 						break loop

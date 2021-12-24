@@ -17,7 +17,7 @@ type ReceivedData struct {
 
 var receiveDataFormat *regexp.Regexp
 
-func (im920s *Im920s) receiver() {
+func (im920s *Im920s) receiver(cmdResponseChan chan string) {
 	for {
 		str := <-im920s.uartChannel.receiver
 
@@ -36,7 +36,7 @@ func (im920s *Im920s) receiver() {
 				// TODO config struct
 				println("Info: Group number has been registered")
 			} else { // コマンドに対するレスポンス
-				im920s.responseReceiver <- str
+				cmdResponseChan <- str
 			}
 		}
 	}
