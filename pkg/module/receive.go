@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type ReceivedData struct {
@@ -30,7 +31,11 @@ func (im920s *Im920s) receiver(cmdResponseChan chan string) {
 				continue
 			}
 
-			im920s.dataReceiver <- *data
+			select {
+			case im920s.dataReceiver <- *data:
+			case <-time.After(10 * time.Second): // Timeout
+			}
+
 		} else {
 			if str == "GRNOREGD\r\n" { // STGNコマンド実行後 グループ番号設定パケット受信時
 				// TODO config struct
