@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type ReceivedData struct {
@@ -17,7 +18,7 @@ type ReceivedData struct {
 
 var receiveDataFormat *regexp.Regexp
 
-func (im920s *Im920s) receiver() {
+func (im920s *Im920s) receiver(cmdResponseChan chan string) {
 	for {
 		str := <-im920s.uartChannel.receiver
 
@@ -30,13 +31,17 @@ func (im920s *Im920s) receiver() {
 				continue
 			}
 
-			im920s.dataReceiver <- *data
+			select {
+			case im920s.dataReceiver <- *data:
+			case <-time.After(10 * time.Second): // Timeout
+			}
+
 		} else {
 			if str == "GRNOREGD\r\n" { // STGNコマンド実行後 グループ番号設定パケット受信時
 				// TODO config struct
 				println("Info: Group number has been registered")
 			} else { // コマンドに対するレスポンス
-				im920s.responseReceiver <- str
+				cmdResponseChan <- str
 			}
 		}
 	}
